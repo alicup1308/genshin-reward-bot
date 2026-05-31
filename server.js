@@ -116,7 +116,8 @@ client.on('messageCreate', async (message) => {
 });
 
 // PASTE YOUR FRESH DISCORD BOT TOKEN HERE
-const DISCORD_BOT_TOKEN = "MTUxMDMwOTYyMzc1ODg1MjEzNg.GLbZ_0.1hQrYg-ExUKvSEK1dqZVii-GX35g8cE338rXIM"; 
+const DISCORD_BOT_TOKEN = process.env.DISCORD_TOKEN;
+
 
 client.once('clientReady', () => {
     console.log(`🤖 SUCCESS: Connected directly to Discord API. Bot is online as: ${client.user.tag}`);
