@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Developer Admin Control Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0b0c10; color: #fff; padding: 30px; text-align: center; }
+        .container { max-width: 600px; margin: 0 auto; background: #1f2833; padding: 25px; border-radius: 12px; border: 2px solid #ff4a4a; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        h1 { color: #ff4a4a; margin-top: 0; text-transform: uppercase; font-style: italic; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: none; font-size: 15px; box-sizing: border-box; font-weight: bold; }
+        input { background: #0b0c10; color: #fff; border: 1px solid #45f3ff; text-align: center; }
+        button { background: #ff4a4a; color: #fff; cursor: pointer; text-transform: uppercase; }
+        button:hover { background: #cc3b3b; }
+        .alert { padding: 12px; margin: 10px 0; border-radius: 6px; font-weight: bold; background: #107c41; color: #fff; }
+        .hidden { display: none; }
+        .player-card { background: #0b0c10; padding: 15px; border-radius: 6px; margin-top: 20px; text-align: left; border-left: 4px solid #ff4a4a; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🛠️ Central Database Admin Panel</h1>
+        <p style="color: #667085;">Modify and overwrite active player credit ledger values manually.</p>
+        
+        <div id="status-banner" class="alert hidden"></div>
+
+        <input type="text" id="target-id-input" placeholder="ENTER PLAYER DISCORD USER ID">
+        <button onclick="lookupUser()">Fetch Account Profile</button>
+
+        <div id="edit-view" class="hidden">
+            <div class="player-card">
+                <p>👤 **Account Handle:** <span id="display-name" style="color: #45f3ff;">-</span></p>
+                <p>🪙 **Active Ledger Balance:** <span id="display-current-credits" style="color: #00e676;">0</span> Credits</p>
+            </div>
+
+            <h3 style="margin-top: 20px; text-align: left; color: #ff4a4a;">Update Balance:</h3>
+            <input type="number" id="new-credits-input" placeholder="ENTER NEW CREDIT AMOUNT">
+            <button style="background: #00e676; color: #111;" onclick="updateUserCredits()">Commit Database Changes</button>
+        </div>
+    </div>
+
+    <script>
+        let editingUserId = "";
+
+        function showStatus(msg) {
+            const banner = document.getElementById('status-banner');
+            banner.innerText = msg;
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.classList.add('hidden'), 4000);
+        }
+
+        async function lookupUser() {
+            const userId = document.getElementById('target-id-input').value.trim();
+            if (!userId) return;
+
+            const response = await fetch('/api/get-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discordId: userId })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                editingUserId = userId;
+                document.getElementById('display-name').innerText = data.username;
+                document.getElementById('display-current-credits').innerText = data.chatCredits;
+                document.getElementById('new-credits-input').value = data.chatCredits;
+                document.getElementById('edit-view').classList.remove('hidden');
+                showStatus("Data synced! Profile loaded successfully.");
+            }
+        }
+
+        async function updateUserCredits() {
+            const targetNewValue = document.getElementById('new-credits-input').value;
+            
+            const response = await fetch('/api/admin-update-credits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discordId: editingUserId, newCredits: targetNewValue })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('display-current-credits').innerText = targetNewValue;
+                showStatus(`Database Overwrite Successful! Balance set to ${targetNewValue}.`);
+            }
+        }
+    </script>
+</body>
+</html>

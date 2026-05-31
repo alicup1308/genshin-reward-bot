@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exchange Rewards Control Center</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0c0e12; color: #fff; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { color: #5865F2; margin: 0; text-transform: uppercase; }
+        header p { color: #8e9297; margin: 5px 0 0 0; }
+        .workspace { display: flex; gap: 30px; max-width: 1100px; width: 100%; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+        .card { background: #18191c; border-radius: 14px; padding: 25px; box-sizing: border-box; flex: 1; min-width: 340px; max-width: 480px; border: 2px solid #2f3136; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .shop-card { border-color: #5865F2; }
+        .game-card { border-color: #00e676; }
+        input, select, button { width: 100%; padding: 14px; margin: 12px 0; border-radius: 8px; border: none; font-size: 15px; box-sizing: border-box; font-weight: bold; }
+        input, select { background: #202225; color: #fff; border: 1px solid #3f4147; }
+        select optgroup { background: #18191c; color: #ffaa00; font-weight: bold; }
+        button.primary { background: #5865F2; color: white; cursor: pointer; }
+        button.action { background: #00e676; color: #121214; cursor: pointer; text-transform: uppercase; }
+        .hidden { display: none; }
+        .alert { padding: 12px; margin: 10px 0; border-radius: 8px; font-weight: bold; font-size: 14px; text-align: center; background: #e02424; color: #fff; word-break: break-word; }
+        .alert-success { background: #107c41; }
+        .ledger-row { display: flex; justify-content: space-between; background: #2f3136; padding: 12px; margin: 8px 0; border-radius: 8px; font-size: 15px; }
+        .earn-info { background: #202225; padding: 15px; border-radius: 8px; border-left: 4px solid #5865F2; margin-bottom: 20px; font-size: 14px; text-align: left; line-height: 1.5; }
+        .earn-info h4 { margin: 0 0 8px 0; color: #5865F2; text-transform: uppercase; }
+        .history-box { background: #0b0c10; border-radius: 8px; border: 1px solid #2f3136; padding: 15px; max-height: 160px; overflow-y: auto; text-align: left; font-size: 13px; }
+        .history-item { padding: 8px 0; border-bottom: 1px solid #1f2026; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Exchange Rewards</h1>
+        <p>College Systems Project: Connecting Discord Ledger States to Transaction Gateways</p>
+    </header>
+
+    <div id="notice-box" class="alert hidden"></div>
+
+    <div class="workspace">
+        <!-- PORTAL COMPONENT -->
+        <div class="card shop-card">
+            <h2 style="color:#5865F2; margin-top:0;">🌐 3rd Party Top-Up Portal</h2>
+            
+            <div id="shop-login-view">
+                <label>Identify Account Session:</label>
+                <input type="text" id="user-id-field" placeholder="Enter Your Discord User ID">
+                <p style="font-size: 12px; color:#8e9297; margin-top:-5px;">Test Offline ID Bypass: 1234567890</p>
+                <button class="primary" onclick="loadAccountProfile()">Connect Secure Session</button>
+            </div>
+
+            <div id="shop-exchange-view" class="hidden">
+                <div class="ledger-row"><span>Authorized User:</span><span id="label-user" style="color:#5865F2;">-</span></div>
+                <div class="ledger-row"><span>Available Chat Credits:</span><span id="label-credits" style="color:#00e676;">-</span></div>
+                
+                <h3 style="margin-top:25px; border-top:1px solid #2f3136; padding-top:15px;">Convert Rewards</h3>
+                <label>Select Your Reward Package:</label>
+                
+                <select id="package-amount-select">
+                    <optgroup label="✨ GENSHIN IN-GAME CODES">
+                        <option value="primos_50">50x Primogems Voucher - 150 Credits</option>
+                        <option value="mora_10k">10,000x Mora Cash Code - 225 Credits</option>
+                        <option value="resource_pack">Teyvat Resource Pack - 75 Credits</option>
+                    </optgroup>
+                    <optgroup label="🔥 GENSHIN LIMITED PROMOS">
+                        <option value="primos_60_ltd1">60x Primogems (Limited #1) - 300 Credits</option>
+                        <option value="primos_60_ltd2">60x Primogems (Limited #2) - 300 Credits</option>
+                        <option value="primos_20_ltd3">20x Primogems + Ores - 150 Credits</option>
+                        <option value="primos_20_ltd4">20x Primogems Custom - 150 Credits</option>
+                    </optgroup>
+                </select>
+                <button class="action" onclick="executePointTransfer()">Fulfill In-Game Points</button>
+            </div>
+        </div>
+
+        <!-- TELEMETRY MONITOR COMPONENT -->
+        <div class="card game-card">
+            <h2 style="color:#00e676; margin-top:0;">📊 Server System Monitor</h2>
+            <div class="earn-info">
+                <h4>💡 How to Earn Free Credits</h4>
+                • 💬 **Send messages** in any server text channel to gain **+3 credits** per text. <br>
+                • 👥 Be active daily, chat with friends, and participate in server events. <br>
+                • 🚫 Spamming or sending short single letters will get flagged by the auto-filter rules.
+            </div>
+            <h3 style="text-align: left; color:#8e9297; font-size:15px; margin-bottom:10px; text-transform: uppercase;">🕒 Live Redeem History:</h3>
+            <div class="history-box" id="history-box-render">
+                <div style="color:#4a5568; text-align:center; padding-top:40px;">No recent redemptions on this node loop yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let operationalId = "";
+
+        function displayNotification(text, isSuccessful) {
+            const banner = document.getElementById('notice-box');
+            banner.innerText = text;
+            banner.className = `alert ${isSuccessful ? 'alert-success' : ''}`;
+            banner.classList.remove('hidden');
+        }
+
+        async function refreshHistoryLogs() {
+            try {
+                const response = await fetch('/api/get-history');
+                const logs = await response.json();
+                const container = document.getElementById('history-box-render');
+                if (logs.length === 0) return;
+                container.innerHTML = "";
+                logs.forEach(log => {
+                    container.innerHTML += `<div class="history-item"><span>🟢 <b>${log.username}</b> claimed <i>${log.item}</i></span></div>`;
+                });
+            } catch(e){}
+        }
+
+        async function loadAccountProfile() {
+            const idInput = document.getElementById('user-id-field').value.trim();
+            if (!idInput) return;
+            
+            // Clear prior notification logs
+            document.getElementById('notice-box').classList.add('hidden');
+
+            try {
+                const query = await fetch('/api/get-profile', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ discordId: idInput }) 
+                });
+                const rec = await query.json();
+                
+                if (rec.success) {
+                    operationalId = idInput;
+                    document.getElementById('label-user').innerText = rec.username;
+                    document.getElementById('label-credits').innerText = rec.chatCredits;
+                    document.getElementById('shop-login-view').classList.add('hidden');
+                    document.getElementById('shop-exchange-view').classList.remove('hidden');
+                    refreshHistoryLogs();
+                    setInterval(refreshHistoryLogs, 4000);
+                } else {
+                    displayNotification(rec.message, false);
+                }
+            } catch (err) { 
+                displayNotification("Network execution failure connecting to local server API paths.", false); 
+            }
+        }
+
+        async function executePointTransfer() {
+            const selectedKey = document.getElementById('package-amount-select').value;
+            try {
+                const promptTransaction = await fetch('/api/exchange', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ discordId: operationalId, exchangeAmount: selectedKey }) 
+                });
+                const feedback = await promptTransaction.json();
+                if (feedback.success) {
+                    document.getElementById('label-credits').innerText = feedback.newCredits;
+                    displayNotification(feedback.message, true);
+                    refreshHistoryLogs();
+                } else { 
+                    displayNotification(feedback.message, false); 
+                }
+            } catch (err) { 
+                displayNotification("Internal workflow transaction processing error.", false); 
+            }
+        }
+    </script>
+</body>
+</html>

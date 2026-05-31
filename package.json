@@ -1,0 +1,13 @@
+{
+  "name": "fc-mobile-complete-sandbox",
+  "version": "1.0.0",
+  "description": "FC Mobile Sandbox Store with Discord Chat Rewards and Game Client Simulator",
+  "main": "server.js",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "express": "^4.19.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
